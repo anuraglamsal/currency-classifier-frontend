@@ -1,85 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'dart:io';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+	MyHomePage({super.key, required this.title, required this.cameras});
 
-  final String title;
+	String title;
+	List<CameraDescription> cameras;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+	@override
+	State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  List<CameraDescription>? cameras = [];
-  late CameraController controller;
 
-  @override
-  initState() {
-    super.initState();
-    camera_init();
-  }
+	late CameraController controller;
 
-  camera_init() async {
-    await availableCameras().then((value) => cameras = value);
-    controller = CameraController(cameras![0], ResolutionPreset.max);
-    controller.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-    }).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            // Handle access errors here.
-            break;
-          default:
-            // Handle other errors here.
-            break;
-        }
-      }
-    });
-  }
+	@override
+	initState() {
+		super.initState();
+		controller = CameraController(widget.cameras[0], ResolutionPreset.max);
+		controller.initialize().then((_) {
+			if (!mounted) {
+				return;
+			}
+			setState(() {});
+		}).catchError((Object e) {
+			if (e is CameraException) {
+				switch (e.code) {
+					case 'CameraAccessDenied':
+						// Handle access errors here.
+						break;
+					default:
+						// Handle other errors here.
+						break;
+				}
+			}
+		});
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+	}
+
+	Future takePicture() async {
+		if (!controller.value.isInitialized) {return null;}
+		if (controller.value.isTakingPicture) {return null;}
+		try {
+			await controller.setFlashMode(FlashMode.off);
+			XFile picture = await controller.takePicture();
+			Navigator.push(context, MaterialPageRoute(
+					builder: (context) => DisplayPictureScreen(
+						imagePath: picture,
+					)));
+		} on CameraException catch (e) {
+			debugPrint('Error occured while taking picture: $e');
+			return null;
+		}
+	}
+
+	@override
+	void dispose() {
+		controller.dispose();
+		super.dispose();
+	}
+	
+	@override
+	Widget build(BuildContext context) {
+		if (!controller.value.isInitialized) {
+			return Scaffold(
+				body: Center(
+					child: CircularProgressIndicator(
+					)
+				)
+			);
+		}
+		final scale = 1 / (controller.value.aspectRatio * MediaQuery.of(context).size.aspectRatio);
+		return Scaffold(
+			body: Container(
+				child: Stack(
+					children: [
+						Transform.scale(
+							scale: scale,
+							alignment: Alignment.topCenter,
+							child: CameraPreview(controller)
+						),
+						Align(
+							alignment: Alignment.bottomCenter,
+							child: FloatingActionButton(
+								onPressed: takePicture,
+							),
+						)
+					]
+				)
+			)
+		);
+	}
+}
+class DisplayPictureScreen extends StatelessWidget {
+  const DisplayPictureScreen({super.key, required this.imagePath});
+  final XFile imagePath;
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.title),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              /*ElevatedButton(
-                onPressed: check_for_cameras(), child: const Text("Test")),
-            const Text(
-              'You have pushed the button this many times:',
-            ),*/
-              Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: 'Increment',
-          child: const Icon(Icons.add),
-        ),
-      );
-    }
-    return CameraPreview(controller);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Display the Picture')),
+      body: Image.file(File(imagePath.path)),
+    );
   }
 }

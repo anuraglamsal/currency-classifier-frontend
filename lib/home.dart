@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:volume_watcher/volume_watcher.dart';
 import 'dart:io';
 
 class MyHomePage extends StatefulWidget {
@@ -19,6 +20,7 @@ class _MyHomePageState extends State<MyHomePage> {
 	@override
 	initState() {
 		super.initState();
+		VolumeWatcher.hideVolumeView = true;
 		controller = CameraController(widget.cameras[0], ResolutionPreset.max);
 		controller.initialize().then((_) {
 			if (!mounted) {
@@ -72,11 +74,18 @@ class _MyHomePageState extends State<MyHomePage> {
 				)
 			);
 		}
+
 		final scale = 1 / (controller.value.aspectRatio * MediaQuery.of(context).size.aspectRatio);
+
 		return Scaffold(
 			body: Container(
 				child: Stack(
 					children: [
+						/*VolumeWatcher(
+							onVolumeChangeListener: (double volume) {
+								takePicture();
+							},
+						),*/
 						Transform.scale(
 							scale: scale,
 							alignment: Alignment.topCenter,

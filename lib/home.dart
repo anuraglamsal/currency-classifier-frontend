@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'package:http/src/byte_stream.dart';
+import 'package:volume_watcher/volume_watcher.dart';
+import 'package:flutter/services.dart';
 
 class MyHomePage extends StatefulWidget {
 	MyHomePage({super.key, required this.title, required this.cameras});
@@ -18,14 +20,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
 	late CameraController controller;
-	//late responseData; 
+	static const _volumeBtnChannel =
+			MethodChannel("mychannel");
+
 
 	@override
 	initState() {
 		super.initState();
 
-		//server_test();
-		initializeController(); //Camera Controller intialization
+		initializeController(); //Camera Controller intialization.
+		initializeVolume(); //Setting the volume to be 1 and customizing the volume buttons to take pictures. 
 	}
 
 	@override
@@ -67,6 +71,31 @@ class _MyHomePageState extends State<MyHomePage> {
 			)
 		);
 	}
+
+	Future<void> initializeVolume() async {
+
+		//Setting volume to max. 
+		late var maxVolume; 
+		try{
+			maxVolume = await VolumeWatcher.getMaxVolume;
+		} on PlatformException {
+			// handle exception
+		}
+
+		//Code to handle what to do when volume keys are pressed. The replacement of default behavior of volume buttons is done in 'MainActivity.kt' in 
+		//'android/app/....'.
+		VolumeWatcher.setVolume(maxVolume);
+		_volumeBtnChannel.setMethodCallHandler((call) {
+			if (call.method == "volumeBtnPressed") {
+				if (call.arguments == "volume_down" || call.arguments == "volume_up") {
+					takePicture();
+				}
+			}
+
+			return Future.value(null);
+		});
+	}
+
 
 	Future<void> server_test(XFile file) async {
 		//create multipart request for POST or PATCH method

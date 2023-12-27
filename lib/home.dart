@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:http/src/byte_stream.dart';
 import 'package:volume_watcher/volume_watcher.dart';
 import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class MyHomePage extends StatefulWidget {
 	MyHomePage({super.key, required this.title, required this.cameras});
@@ -22,13 +23,14 @@ class _MyHomePageState extends State<MyHomePage> {
 	late CameraController controller;
 	static const _volumeBtnChannel =
 			MethodChannel("mychannel");
+	final player = AudioPlayer();
 
 
 	@override
 	initState() {
 		super.initState();
 
-		initializeController(); //Camera Controller intialization.
+		initializeCameraController(); //Camera Controller intialization.
 		initializeVolume(); //Setting the volume to be 1 and customizing the volume buttons to take pictures. 
 	}
 
@@ -97,7 +99,8 @@ class _MyHomePageState extends State<MyHomePage> {
 	}
 
 
-	Future<void> server_test(XFile file) async {
+	Future<void> sendRequest(XFile file) async {
+
 		//create multipart request for POST or PATCH method
 		var request = http.MultipartRequest("POST", Uri.parse("http://192.168.1.68:3000/upload"));
 		//add text fields
@@ -108,26 +111,15 @@ class _MyHomePageState extends State<MyHomePage> {
 		request.files.add(pic);
 		var response = await request.send();
 
-		//Get the response from the server
-		Uint8List responseData = await response.stream.toBytes();
-
-		Navigator.push(context, MaterialPageRoute(
-				builder: (context) => SentFromServer(
-					responseData: responseData,
-				)));
-
-		//var responseString = String.fromCharCodes(responseData);
-
-		/*final response = await http.get(Uri.parse('http://192.168.1.68:3000/'));
-		if(response.statusCode == 200){
-			debugPrint(response.body);
-		}
-		else{
-			throw Exception('Failed to connect to server');
-		}*/
+		//Get the response from the server. Currently we only get an audio file corresponding to the tts. 
+		Uint8List responseData = await response.stream.toBytes(); //convert the response to bytes such that I can use the response in the app.
+	                                                                  //Uint8List is preferred for bytes than List.	
+		//Play the audio
+		await player.play(BytesSource(responseData)); 
 	}
 
-        void initializeController(){
+        void initializeCameraController(){
+
 		controller = CameraController(widget.cameras[0], ResolutionPreset.max);
 		controller.initialize().then((_) {
 			if (!mounted) {
@@ -149,34 +141,26 @@ class _MyHomePageState extends State<MyHomePage> {
 	}	
 
 	Future takePicture() async {
+
 		if (!controller.value.isInitialized) {return null;}
 		if (controller.value.isTakingPicture) {return null;}
 		try {
 			await controller.setFlashMode(FlashMode.off);
 			XFile picture = await controller.takePicture();
-			server_test(picture);
+
+			sendRequest(picture); //send the picture to the server
+
 			Navigator.push(context, MaterialPageRoute(
 					builder: (context) => DisplayPictureScreen(
 						imagePath: picture,
 					)));
+
 		} on CameraException catch (e) {
 			debugPrint('Error occured while taking picture: $e');
 			return null;
 		}
 	}
 
-}
-class SentFromServer extends StatelessWidget {
-  const SentFromServer({super.key, required this.responseData});
-  final Uint8List responseData;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
-      body: Image.memory(Uint8List.fromList(responseData)),
-    );
-  }
 }
 
 class DisplayPictureScreen extends StatelessWidget {
@@ -186,7 +170,7 @@ class DisplayPictureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
+      appBar: AppBar(title: const Text('The picture')),
       body: Image.file(File(imagePath.path)),
     );
   }

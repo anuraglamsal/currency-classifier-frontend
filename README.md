@@ -5,3 +5,5 @@ Idea Notes:
 * haar cascade .
 * Volume Dilemma: Volume button to take pic is not easy for some reason. And even if you can do it, what if the user wants to change the volume? They would want to do this if they can't hear the result of the detection. - Solved. 
 * IOS support for the volume thing. Perhaps use an emulator for this. Not high priority though, don't have to do this immediately. 
+* Play the recieved audio. - Solved.
+* Don't make the camera take the whole screen. Crop it. And put a nicer camera icon. 

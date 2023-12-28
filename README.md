@@ -9,4 +9,5 @@ Idea Notes:
 * Don't make the camera take the whole screen. Crop it. And put a nicer camera icon. (Done.)
 * Landscape preview is weird. Fix that. (Solved. Just disabled landscape mode.)
 * Make the codebase neater. (It seems like there is no "simple" way to separate logic from UI code, at least for a simple app like ours.)
-* todo: Work more on design. The camera sort of looks weird too, probably because of height and width.
+* todo: Work more on design. The camera sort of looks weird too when tilting, probably because of height and width. Also, 
+  the app glitches if I open the camera app of the phone and switch to our app again. 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//import 'package:flutter/rendering.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -44,32 +45,35 @@ class _MyHomePageState extends State<MyHomePage> {
 	Widget build(BuildContext context) {
 		if (!controller.value.isInitialized) {
 			return Scaffold(
+				backgroundColor: Color(0xff1c1c1f),
 				body: Center(
 					child: CircularProgressIndicator(
+						color: Colors.white,
 					)
 				)
 			);
 		}
 
-		final scale = 1 / (controller.value.aspectRatio * MediaQuery.of(context).size.aspectRatio);
-
 		return Scaffold(
-			body: Container(
-				child: Stack(
-					children: [
-						Transform.scale(
-							scale: scale,
-							alignment: Alignment.topCenter,
-							child: CameraPreview(controller)
-						),
-						Align(
-							alignment: Alignment.bottomCenter,
-							child: FloatingActionButton(
-								onPressed: takePicture,
-							),
-						)
-					]
-				)
+			backgroundColor: Color(0xff1c1c1f),
+			body: Column(
+				//mainAxisAlignment: MainAxisAlignment.center,
+				//crossAxisAlignment: CrossAxisAlignment.center,
+				children: [
+					SizedBox(height: 100),
+					Container(
+						height: MediaQuery.of(context).size.height * 0.65,
+						width: MediaQuery.of(context).size.width,
+						child: CameraPreview(controller), 
+					),
+					SizedBox(height: 30),
+					IconButton.filled(
+						iconSize: 90.0,
+						icon: const Icon(Icons.camera),
+						highlightColor: Colors.blue,
+						onPressed: takePicture,
+					)
+				]
 			)
 		);
 	}

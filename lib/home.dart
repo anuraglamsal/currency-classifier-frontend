@@ -106,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
 	Future<void> sendRequest(XFile file) async {
 
 		//create multipart request for POST or PATCH method
-		var request = http.MultipartRequest("POST", Uri.parse("http://192.168.1.68:3000/upload"));
+		var request = http.MultipartRequest("POST", Uri.parse("http://192.168.1.70:3000/upload"));
 		//add text fields
 		request.fields["text_field"] = "test";
 		//create multipart using filepath, string or bytes

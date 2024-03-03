@@ -41,6 +41,7 @@ dependencies:
   perfect_volume_control: ^1.0.5
   control_volume: ^0.0.2
   audioplayers: ^5.2.1
+  modal_progress_hud_nsn: ^0.5.1
 
 dev_dependencies:
   flutter_test:

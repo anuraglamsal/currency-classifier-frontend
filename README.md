@@ -16,8 +16,9 @@ Idea Notes:
   # Don't show the picture after it has been taken. Show a progress indicator that indicates waiting for the mp3 to arrive. When the progress
   indicator is showing, "disable" the "volume click to take pic" functionality (just use a bool flag.) 
   -- the progress indicator part has been done. make the background opacity low here, and also the disable volume click to take pic functionality
-     is yet to be added. Also, as soon as you click the volume button, do the setState, not when the picture has been officially taken. 
+     is yet to be added. also, as soon as you click the volume button, do the setstate, not when the picture has been officially taken. -- done
   # Language choosing option. You can use "volume down" for this btw. 
+  # do a timeout thing if server doesn't return something after a period of time. 
 
 
 

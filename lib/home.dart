@@ -74,7 +74,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
         backgroundColor: Color(0xff1c1c1f),
-        body: ModalProgressHUD(child: cameraWidget(), inAsyncCall: _server));
+        body: ModalProgressHUD(
+            child: cameraWidget(), 
+	    inAsyncCall: _server, 
+	    opacity: 0.6, 
+	    color: Colors.black, 
+	    blur: 1.0,
+	    progressIndicator: CircularProgressIndicator(color: Colors.white)
+	)
+    );
   }
 
   Future<void> initializeVolume() async {
@@ -152,36 +160,20 @@ class _MyHomePageState extends State<MyHomePage> {
     if (controller.value.isTakingPicture) {
       return null;
     }
-    try {
-      await controller.setFlashMode(FlashMode.off);
-      XFile picture = await controller.takePicture();
+    if(!_server){
+	    try {
+		    await controller.setFlashMode(FlashMode.off);
+		    XFile picture = await controller.takePicture();
 
-      sendRequest(picture); //send the picture to the server
+		    sendRequest(picture); //send the picture to the server
 
-      setState(() {
-        _server = true;
-      });
-
-      /*Navigator.push(context, MaterialPageRoute(
-					builder: (context) => DisplayPictureScreen(
-						imagePath: picture,
-					)));*/
-    } on CameraException catch (e) {
-      debugPrint('Error occured while taking picture: $e');
-      return null;
+		    setState(() {
+			    _server = true;
+		    });
+	    } on CameraException catch (e) {
+		    debugPrint('Error occured while taking picture: $e');
+		    return null;
+	    }
     }
   }
 }
-
-/*class DisplayPictureScreen extends StatelessWidget {
-  const DisplayPictureScreen({super.key, required this.imagePath});
-  final  imagePath;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('The picture')),
-      body: Image.file(File(imagePath.path)),
-    );
-  }
-}*/

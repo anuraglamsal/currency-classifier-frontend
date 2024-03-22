@@ -9,6 +9,7 @@ import 'package:volume_watcher/volume_watcher.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:vibration/vibration.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.title, required this.cameras});
@@ -28,6 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   initState() {
+	//  testVibrator();
+
     super.initState();
 
     initializeCameraController(); //Camera Controller intialization.
@@ -45,7 +48,9 @@ class _MyHomePageState extends State<MyHomePage> {
         //mainAxisAlignment: MainAxisAlignment.center,
         //crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 100),
+	  SizedBox(height: 30),
+	  Image.asset('assets/logo_2.png', width: 150, height: 50),
+	  SizedBox(height: 10),
           Container(
             height: MediaQuery.of(context).size.height * 0.65,
             width: MediaQuery.of(context).size.width,
@@ -57,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.camera),
             highlightColor: Colors.blue,
             onPressed: takePicture,
+	    alignment: Alignment.center,
           )
         ]);
   }
@@ -112,24 +118,44 @@ class _MyHomePageState extends State<MyHomePage> {
     //create multipart request for POST or PATCH method
     var request = http.MultipartRequest(
         "POST", Uri.parse("http://192.168.1.70:3000/upload"));
+
     //add text fields
-    request.fields["text_field"] = "test";
+    //request.fields["text_field"] = "test";
+
     //create multipart using filepath, string or bytes
     var pic = await http.MultipartFile.fromPath("file", file.path);
     //add multipart to request
     request.files.add(pic);
     var response = await request.send();
 
+    vibrator(response.headers['etag']);
+
     //Get the response from the server. Currently we only get an audio file corresponding to the tts.
-    Uint8List responseData = await response.stream
-        .toBytes(); //convert the response to bytes such that I can use the response in the app.
-    //Uint8List is preferred for bytes than List.
+    Uint8List responseData = await response.stream.toBytes(); //convert the response to bytes such that I can use the response in the app.
+    							      //Uint8List is preferred for bytes than List.
     //Play the audio
     await player.play(BytesSource(responseData));
 
     setState(() {
       _server = false;
     });
+  }
+
+  void vibrator(label) async {
+	  bool? vib = await Vibration.hasCustomVibrationsSupport();
+	  label = label.substring(1, label.length - 1);
+
+	  if (vib!) {
+		  Map<String, int> label_to_itr = {"five": 1, "ten": 2, "twenty": 3, "fifty": 4, "hundred": 5, "five hundred": 6, "thousand": 7};
+		  List<int> pattern = [];
+
+		  for(int i=0; i<label_to_itr[label]!; ++i){
+			  pattern.add(100);
+			  pattern.add(500);
+		  }
+
+		  Vibration.vibrate(pattern: pattern);
+	  }
   }
 
   void initializeCameraController() {

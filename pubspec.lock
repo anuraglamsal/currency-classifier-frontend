@@ -240,6 +240,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  google_fonts:
+    dependency: "direct main"
+    description:
+      name: google_fonts
+      sha256: b1ac0fe2832c9cc95e5e88b57d627c5e68c223b9657f4b96e1487aa9098c7b82
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.2.1"
   http:
     dependency: "direct main"
     description:
@@ -485,6 +493,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.1"
+  toggle_switch:
+    dependency: "direct main"
+    description:
+      name: toggle_switch
+      sha256: "13171980ba0197b672ce1779186e89a3c0cc864b9e46bbcdb1e6729214f2691f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
   typed_data:
     dependency: transitive
     description:
@@ -567,4 +583,4 @@ packages:
     version: "1.0.3"
 sdks:
   dart: ">=3.2.2 <4.0.0"
-  flutter: ">=3.13.0"
+  flutter: ">=3.19.2"

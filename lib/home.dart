@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:vibration/vibration.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.title, required this.cameras});
@@ -26,6 +28,8 @@ class _MyHomePageState extends State<MyHomePage> {
   static const _volumeBtnChannel = MethodChannel("mychannel");
   final player = AudioPlayer();
   bool _server = false;
+  bool light = true;
+  int _initialLabelIndex = 0;
 
   @override
   initState() {
@@ -57,13 +61,67 @@ class _MyHomePageState extends State<MyHomePage> {
             child: CameraPreview(controller),
           ),
           SizedBox(height: 30),
-          IconButton.filled(
-            iconSize: 90.0,
-            icon: const Icon(Icons.camera),
-            highlightColor: Colors.blue,
-            onPressed: takePicture,
-	    alignment: Alignment.center,
-          )
+	  Row(
+		  children: [
+			  SizedBox(width: 40), 
+			  Column(
+				  children: [
+					  Switch.adaptive(
+						  value: light, 
+						  onChanged: (bool value){
+							  setState(() {
+								  light = value;
+							  });
+						  }
+					  ),
+					  Text(
+						  "Haptic",
+						  style: GoogleFonts.lato(
+							  textStyle: TextStyle(color: Colors.white, letterSpacing: .5, fontWeight: FontWeight.bold),
+						  ),
+					  ),
+				  ]
+			  ),
+			  SizedBox(width: 40),
+			  IconButton.filled(
+				  iconSize: 90.0,
+				  icon: const Icon(Icons.camera),
+				  highlightColor: Colors.blue,
+				  onPressed: takePicture,
+				  alignment: Alignment.center,
+			  ),
+			  SizedBox(width: 45),
+			  Column(
+				  children: [
+					  SizedBox(height: 6),
+					  ToggleSwitch(
+						  minWidth: 37.0,
+						  minHeight: 37.0,
+						  fontSize: 12.0,
+						  initialLabelIndex: _initialLabelIndex,
+						  activeBgColors: [[Colors.red.shade700], [Colors.blue.shade700]],
+						  activeFgColor: Colors.white,
+						  inactiveBgColor: Colors.blueGrey.shade300,
+						  inactiveFgColor: Colors.grey[900],
+						  totalSwitches: 2,
+						  labels: ['NP', 'EN'],
+						  onToggle: (index) {
+							  setState((){
+								  _initialLabelIndex = index!;
+							  });
+						  },
+					  ),
+					  SizedBox(height: 7),
+					  Text(
+						  "Lang",
+						  style: GoogleFonts.lato(
+							  textStyle: TextStyle(color: Colors.white, letterSpacing: .5, fontWeight: FontWeight.bold),
+						  ),
+					  ),
+				  ], 
+			  ),
+		      ],
+		  ),
         ]);
   }
 
@@ -71,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     if (!controller.value.isInitialized) {
       return Scaffold(
-          backgroundColor: Color(0xff1c1c1f),
+          backgroundColor: Color(0xff28282B),
           body: Center(
               child: CircularProgressIndicator(
             color: Colors.white,

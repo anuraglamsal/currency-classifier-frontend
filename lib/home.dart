@@ -27,14 +27,13 @@ class _MyHomePageState extends State<MyHomePage> {
   late CameraController controller;
   static const _volumeBtnChannel = MethodChannel("mychannel");
   final player = AudioPlayer();
-  bool _server = false;
+  bool _server1 = false;
+  bool _server2 = false;
   bool light = true;
-  int _initialLabelIndex = 0;
+  int labelIndex = 0;
 
   @override
   initState() {
-	//  testVibrator();
-
     super.initState();
 
     initializeCameraController(); //Camera Controller intialization.
@@ -98,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
 						  minWidth: 37.0,
 						  minHeight: 37.0,
 						  fontSize: 12.0,
-						  initialLabelIndex: _initialLabelIndex,
+						  initialLabelIndex: labelIndex,
 						  activeBgColors: [[Colors.red.shade700], [Colors.blue.shade700]],
 						  activeFgColor: Colors.white,
 						  inactiveBgColor: Colors.blueGrey.shade300,
@@ -107,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
 						  labels: ['NP', 'EN'],
 						  onToggle: (index) {
 							  setState((){
-								  _initialLabelIndex = index!;
+								  labelIndex = index!;
 							  });
 						  },
 					  ),
@@ -140,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Color(0xff1c1c1f),
         body: ModalProgressHUD(
             child: cameraWidget(), 
-	    inAsyncCall: _server, 
+	    inAsyncCall: _server1, 
 	    opacity: 0.6, 
 	    color: Colors.black, 
 	    blur: 1.0,
@@ -172,31 +171,41 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<void> sendRequest(XFile file) async {
-    //create multipart request for POST or PATCH method
+  Future<void> audioRequest(XFile file) async {
     var request = http.MultipartRequest(
-        "POST", Uri.parse("http://192.168.1.70:3000/upload"));
-
-    //add text fields
-    //request.fields["text_field"] = "test";
-
-    //create multipart using filepath, string or bytes
+        "POST", Uri.parse("http://192.168.1.70:3000/audio"));
+    request.fields["lang_idx"] = labelIndex.toString();
     var pic = await http.MultipartFile.fromPath("file", file.path);
-    //add multipart to request
     request.files.add(pic);
     var response = await request.send();
 
     vibrator(response.headers['etag']);
 
-    //Get the response from the server. Currently we only get an audio file corresponding to the tts.
-    Uint8List responseData = await response.stream.toBytes(); //convert the response to bytes such that I can use the response in the app.
-    							      //Uint8List is preferred for bytes than List.
-    //Play the audio
+    Uint8List responseData = await response.stream.toBytes(); 
     await player.play(BytesSource(responseData));
 
     setState(() {
-      _server = false;
+      _server1 = false;
     });
+  }
+
+  Future<void> imageRequest() async {
+    var response = await http.get(Uri.parse("http://192.168.1.70:3000/image"));
+
+    popupBoundedPic(response.bodyBytes);
+
+    setState(() {
+      _server2 = false;
+    });
+  }
+
+  Future<void> popupBoundedPic(boundedImage) async {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) => Dialog(
+		child: Image.memory(boundedImage, width: 300, height: 300),
+        ),
+      );
   }
 
   void vibrator(label) async {
@@ -244,15 +253,17 @@ class _MyHomePageState extends State<MyHomePage> {
     if (controller.value.isTakingPicture) {
       return null;
     }
-    if(!_server){
+    if(!_server1 && !_server2){
 	    try {
 		    await controller.setFlashMode(FlashMode.off);
 		    XFile picture = await controller.takePicture();
 
-		    sendRequest(picture); //send the picture to the server
+		    audioRequest(picture);
+		    imageRequest();
 
 		    setState(() {
-			    _server = true;
+			    _server1 = true;
+			    _server2 = true;
 		    });
 	    } on CameraException catch (e) {
 		    debugPrint('Error occured while taking picture: $e');

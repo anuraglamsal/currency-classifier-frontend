@@ -43,6 +43,7 @@ Idea Notes:
  
 * Use a pop up card (512 x 512 basically) to show the image with bounding box. The image with bounding box is sent from the server, so the frontend
   just has to worry about display the image. 
+  -- done
 
 * shorten the pulses and keep gap between the pulses. Also, I think it's better to give the haptic feedback after the TTS. Just put the vibration code below tts.
 

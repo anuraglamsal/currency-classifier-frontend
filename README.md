@@ -55,4 +55,6 @@ Idea Notes:
   -- i don't think i'll do this tbh. 
 
 * do a timeout thing if server doesn't return something after a period of time. - Make the wait-time 20 seconds.
-  -- 
+  -- done 
+
+* add logic for haptic button.

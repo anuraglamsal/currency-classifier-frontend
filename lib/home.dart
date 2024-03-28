@@ -32,6 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _server2 = false;
   bool light = true;
   int labelIndex = 0;
+  Timer? _timer;
 
   @override
   initState() {
@@ -196,6 +197,10 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _server1 = false;
     });
+
+    if(!_server2){
+	    _timer?.cancel();
+    }
   }
 
   Future<void> imageRequest() async {
@@ -206,6 +211,10 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _server2 = false;
     });
+
+    if(!_server1){
+	    _timer?.cancel();
+    }
   }
 
   popupBoundedPic(boundedImage){
@@ -267,22 +276,22 @@ class _MyHomePageState extends State<MyHomePage> {
 		    await controller.setFlashMode(FlashMode.off);
 		    XFile picture = await controller.takePicture();
 
-		    audioRequest(picture);
-		    imageRequest();
-
 		    setState(() {
 			    _server1 = true;
 			    _server2 = true;
 		    });
 
-		    Timer(Duration(seconds: 20), () {
-			    if(_server1 || _server2){
-				    alertMessage();
-				    setState((){
-					    _server1 = false;
-					    _server2 = false;
-				    });
-			    }
+		    audioRequest(picture);
+		    imageRequest();
+
+		    //final stopwatch = Stopwatch()..start();
+
+		    _timer = Timer(Duration(seconds: 20), () {
+			    alertMessage();
+			    setState((){
+				    _server1 = false;
+				    _server2 = false;
+			    });
 		    });
 	    } on CameraException catch (e) {
 		    debugPrint('Error occured while taking picture: $e');

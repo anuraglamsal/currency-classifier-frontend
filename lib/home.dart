@@ -12,6 +12,7 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:vibration/vibration.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toggle_switch/toggle_switch.dart';
+import 'dart:async';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.title, required this.cameras});
@@ -139,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Color(0xff1c1c1f),
         body: ModalProgressHUD(
             child: cameraWidget(), 
-	    inAsyncCall: _server1, 
+	    inAsyncCall: _server1 || _server2, 
 	    opacity: 0.6, 
 	    color: Colors.black, 
 	    blur: 1.0,
@@ -162,9 +163,15 @@ class _MyHomePageState extends State<MyHomePage> {
     VolumeWatcher.setVolume(maxVolume);
     _volumeBtnChannel.setMethodCallHandler((call) {
       if (call.method == "volumeBtnPressed") {
-        if (call.arguments == "volume_down" || call.arguments == "volume_up") {
+        if (call.arguments == "volume_down"){
           takePicture();
         }
+	else if(call.arguments == "volume_up"){
+	  int index = (labelIndex==1 ? labelIndex-1 : labelIndex+1);
+	  setState((){
+		  labelIndex = index;
+	  });
+	}
       }
 
       return Future.value(null);
@@ -179,10 +186,12 @@ class _MyHomePageState extends State<MyHomePage> {
     request.files.add(pic);
     var response = await request.send();
 
-    vibrator(response.headers['etag']);
-
     Uint8List responseData = await response.stream.toBytes(); 
     await player.play(BytesSource(responseData));
+
+    await Future.delayed(Duration(seconds: 1, milliseconds: 500));
+
+    vibrator(response.headers['etag']);
 
     setState(() {
       _server1 = false;
@@ -199,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<void> popupBoundedPic(boundedImage) async {
+  popupBoundedPic(boundedImage){
       return showDialog(
         context: context,
         builder: (BuildContext context) => Dialog(
@@ -217,8 +226,8 @@ class _MyHomePageState extends State<MyHomePage> {
 		  List<int> pattern = [];
 
 		  for(int i=0; i<label_to_itr[label]!; ++i){
-			  pattern.add(100);
-			  pattern.add(500);
+			  pattern.add(200);
+			  pattern.add(300);
 		  }
 
 		  Vibration.vibrate(pattern: pattern);
@@ -265,10 +274,34 @@ class _MyHomePageState extends State<MyHomePage> {
 			    _server1 = true;
 			    _server2 = true;
 		    });
+
+		    Timer(Duration(seconds: 20), () {
+			    if(_server1 || _server2){
+				    alertMessage();
+				    setState((){
+					    _server1 = false;
+					    _server2 = false;
+				    });
+			    }
+		    });
 	    } on CameraException catch (e) {
 		    debugPrint('Error occured while taking picture: $e');
 		    return null;
 	    }
     }
+  }
+
+  alertMessage(){
+	  return showDialog(
+		  context: context,
+		  builder: (BuildContext context) => AlertDialog(
+			  backgroundColor: Colors.red.shade900,
+			  title: Text("Response wait time of 20 seconds exceeded!",
+				  style: GoogleFonts.lato(
+					  textStyle: TextStyle(color: Colors.white, letterSpacing: .5, fontWeight: FontWeight.bold),
+				  ),
+			  ),
+		  ),
+	  );
   }
 }

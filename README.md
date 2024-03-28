@@ -46,9 +46,13 @@ Idea Notes:
   -- done
 
 * shorten the pulses and keep gap between the pulses. Also, I think it's better to give the haptic feedback after the TTS. Just put the vibration code below tts.
+  -- done
 
 * Language choosing toggle. You can use "volume down" for this btw. 
+  -- done. used volume up because it is easier to take picture using volume down. 
 
 * haptic feedback on/off toggle. You can use "power button" for this. 
+  -- i don't think i'll do this tbh. 
 
 * do a timeout thing if server doesn't return something after a period of time. - Make the wait-time 20 seconds.
+  -- 

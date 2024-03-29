@@ -6,6 +6,8 @@
     <string>This app needs access to camera when used</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>This app needs access to microphone when used</string>
+        <key>CFBundleDisplayName</key>
+        <string>CurrClass</string> 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

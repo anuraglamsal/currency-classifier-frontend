@@ -181,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> audioRequest(XFile file) async {
     var request = http.MultipartRequest(
-        "POST", Uri.parse("http://192.168.1.70:3000/audio"));
+        "POST", Uri.parse("http://192.168.29.201:3000/audio"));
     request.fields["lang_idx"] = labelIndex.toString();
     var pic = await http.MultipartFile.fromPath("file", file.path);
     request.files.add(pic);
@@ -191,8 +191,10 @@ class _MyHomePageState extends State<MyHomePage> {
     await player.play(BytesSource(responseData));
 
     await Future.delayed(Duration(seconds: 1, milliseconds: 500));
-
-    vibrator(response.headers['etag']);
+    
+    if(light){
+    	vibrator(response.headers['etag']);
+    }
 
     setState(() {
       _server1 = false;
@@ -204,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> imageRequest() async {
-    var response = await http.get(Uri.parse("http://192.168.1.70:3000/image"));
+    var response = await http.get(Uri.parse("http://192.168.29.201:3000/image"));
 
     popupBoundedPic(response.bodyBytes);
 

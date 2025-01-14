@@ -1,1 +1,1 @@
-frontend for the currency classifier. 
+Frontend for the currency classification project. 

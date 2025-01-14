@@ -1,1 +1,1 @@
-Frontend for the currency classification project. 
+Flutter frontend for the currency classification project. 
